@@ -7,17 +7,18 @@ import numpy as np
 WIDTH, HEIGHT = 800, 600
 FPS = 25
 PARTICLE_RADIUS = 5
-N_PARTICLES = 20
-CHARGE_FORCE_K = 1000  # Coulomb constant (scaled)
+N_PARTICLES = 200
+CHARGE_FORCE_K = 10000  # Coulomb constant (scaled)
 NUCLEAR_FORCE_A = 500   # Strength of short-range attraction
 NUCLEAR_SIGMA = 25       # Range of short-range attraction
+MASS = 500
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 class Particle:
-    def __init__(self, x, y, vx, vy, charge,  mass=5.0):
+    def __init__(self, x, y, vx, vy, charge,  mass=MASS):
         self.pos = np.array([x, y], dtype=float)
         self.vel = np.array([vx, vy], dtype=float)
         self.acc = np.zeros(2)
@@ -50,23 +51,34 @@ def compute_forces(particles):
             p2 = particles[j]
             r_vec = p2.pos - p1.pos
             dist = np.linalg.norm(r_vec)
-            if dist < 1e-1:
+            if dist < 1:
                 continue  # Avoid division by zero
             dir_vec = r_vec / dist
 
             # Charge repulsion (only protons)
-            if p1.charge == 1 and p2.charge == 1:
+            if  p1.charge == 1 and p2.charge == 1:
                 f_mag = CHARGE_FORCE_K / (dist ** 2)
                 force = f_mag * dir_vec
                 p1.acc -= force/p1.mass
                 p2.acc += force/p2.mass
 
-            # Nuclear attraction (short range, for all)
-            #if dist < NUCLEAR_SIGMA * 2:
-            #    f_mag = -NUCLEAR_FORCE_A * math.exp(-dist ** 2 / NUCLEAR_SIGMA ** 2)
-            #    force = f_mag * dir_vec
-            #    p1.acc += force/p1.mass
-            #    p2.acc -= force/p1.mass
+            # Nuclear repultion and spead drag at very close distance
+            if dist < 5:
+                p1.vel *= 0.9
+                p2.vel *= 0.9
+                f_mag = NUCLEAR_FORCE_A * math.exp(-dist ** 2 / NUCLEAR_SIGMA ** 2)
+                continue 
+            
+            # Nuclear attraction at close distance
+            if dist < NUCLEAR_SIGMA*2:
+                f_mag = -NUCLEAR_FORCE_A * math.exp(-dist ** 2 / NUCLEAR_SIGMA ** 2)
+                #f_mag = -CHARGE_FORCE_K / (dist ** 2)
+                force = f_mag * dir_vec
+                p1.acc -= force/p1.mass
+                p2.acc += force/p2.mass
+                #p1.acc = 0
+                #p2.acc = 0
+                
 
 
 # Create particles
@@ -79,6 +91,8 @@ for _ in range(N_PARTICLES):
     charge = 1 if random.random() < 0.5 else 0
     particles.append(Particle(x, y, vx, vy, charge))
 
+particles.append(Particle(100, 100, 0, 0, 0))
+particles.append(Particle(110,110, 0, 0, 0))
 # Main loop
 running = True
 while running:
@@ -88,11 +102,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    compute_forces(particles)
-    for p in particles:
-        p.update()
-        p.draw()
+    
+    for _ in range(1):  # 4 substeps per frame   
+        compute_forces(particles)
+        for p in particles:
+            p.update()
+        for p in particles:
+            p.draw()
 
     pygame.display.flip()
 

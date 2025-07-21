@@ -101,61 +101,60 @@ def nuclear_force(r):
     f_strong[r < NUCLEAR_TOO_CLOSE] = 0  # truncate force
     return f_strong
 
-r = np.linspace(1, 100, 1000)
-f_elect = CHARGE_FORCE_K / ((r ** 2)+CHARGE_FORCE_E**2)
-f_strong = nuclear_force(r)
-plt.figure(figsize=(10, 6))
-plt.plot(r, f_elect, 'r--', label='Electrostatic (Proton-Proton)')
-plt.plot(r, f_strong, 'b-', label='Nuclear (Proton-Proton)')
-plt.axhline(0, color='gray', linewidth=0.5)
-plt.xlabel('Distance (pixels)')
-plt.ylabel('Force magnitude')
-plt.title('Force vs. Distance')
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-#plt.yscale('log')
-#plt.show()
-# Create particles
-particles = []
-for _ in range(N_PARTICLES):
-    x = random.uniform(PARTICLE_RADIUS, WIDTH - PARTICLE_RADIUS)
-    y = random.uniform(PARTICLE_RADIUS, HEIGHT - PARTICLE_RADIUS)
-    vx = random.uniform(-5, 5)
-    vy = random.uniform(-5, 5)
-    #x = random.uniform(350, 400) 
-    #y = random.uniform(350, 400)
-    #vx = 0
-    #vy = 0
-    charge = 1 if random.random() < 0.5 else 0
-    if random.random() < 0.5:
-        charge *= 1 
-    if charge < 0:
-        mass = 0.1
-    else:
-        mass = 1
-    particles.append(Particle(x, y, vx, vy, charge,mass=mass))
+if __name__ == '__main__':
+    print('we are in main')
+    r = np.linspace(1, 100, 1000)
+    f_elect = CHARGE_FORCE_K / ((r ** 2)+CHARGE_FORCE_E**2)
+    f_strong = nuclear_force(r)
+    plt.figure(figsize=(10, 6))
+    plt.plot(r, f_elect, 'r--', label='Electrostatic (Proton-Proton)')
+    plt.plot(r, f_strong, 'b-', label='Nuclear (Proton-Proton)')
+    plt.axhline(0, color='gray', linewidth=0.5)
+    plt.xlabel('Distance (pixels)')
+    plt.ylabel('Force magnitude')
+    plt.title('Force vs. Distance')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.yscale('log')
+    plt.show()
+    # Create particles
+    particles = []
+    for _ in range(N_PARTICLES):
+        x = random.uniform(PARTICLE_RADIUS, WIDTH - PARTICLE_RADIUS)
+        y = random.uniform(PARTICLE_RADIUS, HEIGHT - PARTICLE_RADIUS)
+        vx = random.uniform(-5, 5)
+        vy = random.uniform(-5, 5)
+        #x = random.uniform(350, 400) 
+        #y = random.uniform(350, 400)
+        #vx = 0
+        #vy = 0
+        charge = 1 if random.random() < 0.5 else 0
+        if random.random() < 0.5:
+            charge *= 1 
+        if charge < 0:
+            mass = 0.1
+        else:
+            mass = 1
+        particles.append(Particle(x, y, vx, vy, charge,mass=mass))
 
+    # Main loop
+    running = True
 
+    while running:
+        clock.tick(FPS)
+        screen.fill((0, 0, 0))
 
-# Main loop
-running = True
-
-while running:
-    clock.tick(FPS)
-    screen.fill((0, 0, 0))
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
     
-    for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-        compute_forces(particles)
+        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
+            compute_forces(particles)
         for p in particles:
             p.update()
-    for p in particles:
-        p.draw()
-
-    pygame.display.flip()
-
-pygame.quit()
+        for p in particles:
+            p.draw()
+        pygame.display.flip()
+    
+    pygame.quit()

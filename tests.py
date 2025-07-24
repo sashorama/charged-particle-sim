@@ -19,12 +19,7 @@ def two_protons_two_electrons():
             if event.type == pygame.QUIT:
                 running = False
     
-        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-            compute_forces(particles)
-            for p in particles:
-                p.update()
-        for p in particles:
-            p.draw()
+        run_simulation(particles)
 
         pygame.display.flip()
 
@@ -46,12 +41,7 @@ def two_protons_low_speed():
             if event.type == pygame.QUIT:
                 running = False
     
-        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-            compute_forces(particles)
-            for p in particles:
-                p.update()
-        for p in particles:
-            p.draw()
+        run_simulation(particles)
 
         pygame.display.flip()
 
@@ -71,12 +61,7 @@ def two_protons_high_speed():
             if event.type == pygame.QUIT:
                 running = False
     
-        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-            compute_forces(particles)
-            for p in particles:
-                p.update()
-        for p in particles:
-            p.draw()
+        run_simulation(particles)
 
         pygame.display.flip()
 
@@ -96,12 +81,7 @@ def proton_neutron_low_speed():
             if event.type == pygame.QUIT:
                 running = False
     
-        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-            compute_forces(particles)
-            for p in particles:
-                p.update()
-        for p in particles:
-            p.draw()
+        run_simulation(particles)
 
         pygame.display.flip()
 
@@ -121,20 +101,59 @@ def proton_neutron_high_speed():
             if event.type == pygame.QUIT:
                 running = False
     
-        for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
-            compute_forces(particles)
-            for p in particles:
-                p.update()
-        for p in particles:
-            p.draw()
+        run_simulation(particles)
+
+        pygame.display.flip()
+
+def four_protons():
+    # Create particles
+    particles = []
+    particles.append(Particle(300, 200, 0, 0, 1))
+    particles.append(Particle(500, 200, 0, 0, 1))
+    particles.append(Particle(300, 400, 0, 0, 1))
+    particles.append(Particle(500, 400, 0, 0, 1))
+    # Main loop
+    running = True
+
+    while running:
+        clock.tick(FPS)
+        screen.fill((0, 0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+    
+        run_simulation(particles)
+
+        pygame.display.flip()
+
+def proton_electron():
+    # Create particles
+    particles = []
+    particles.append(Particle(300, 200, 0, 0, 1))
+    particles.append(Particle(400, 200, 0, 30, -1, mass=0.01))
+    # Main loop
+    running = True
+
+    while running:
+        clock.tick(FPS)
+        screen.fill((0, 0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+    
+        run_simulation(particles)
 
         pygame.display.flip()
 ##########Begin Tests#####################
 
 #two_protons_two_electrons()
-two_protons_low_speed()
-two_protons_high_speed()
-proton_neutron_low_speed()
-proton_neutron_high_speed()
-two_protons_two_electrons()
+#four_protons()
+#two_protons_low_speed()
+#two_protons_high_speed()
+#proton_neutron_low_speed()
+#proton_neutron_high_speed()
+proton_electron()
+#two_protons_two_electrons()
 pygame.quit()

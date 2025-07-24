@@ -92,8 +92,14 @@ def compute_forces(particles):
                 p2.acc += force/p2.mass
                 #p1.acc = 0
                 #p2.acc = 0
-                
 
+def run_simulation(particles):       
+    for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
+        compute_forces(particles)
+        for p in particles:
+            p.update()
+    for p in particles:
+        p.draw()
 #mathplotlib
 def nuclear_force(r):
     f_strong = -NUCLEAR_FORCE_A * np.exp(-r ** 2 / NUCLEAR_SIGMA ** 2)

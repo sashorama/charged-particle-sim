@@ -12,7 +12,7 @@ N_PARTICLES = 0
 GRAVITY_FORCE_K = 100
 MASS = 1
 VEL_DRAG = 0.99
-GRAVITY_FORCE_E = 4 # Gravity Softening in close distance
+GRAVITY_FORCE_E = 0.1 # Gravity Softening in close distance
 TIME_STEP = 0.01
 
 pygame.init()
@@ -87,11 +87,34 @@ if __name__ == '__main__':
         particles.append(Particle(x, y, vx, vy))
 
     particles = []
-    particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.1496, mass=100, color = (250,250,0), radius = 10))
-    particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5, color = (0,0,250), radius = 5))
-    particles.append(Particle(WIDTH/2+365, HEIGHT/2, 0, 7.8, mass = 0.2, radius = 3))
-    particles.append(Particle(WIDTH/2+70, HEIGHT/2, 0, 10, mass = 0.2, color = (150,120,0), radius = 5))
-    particles.append(Particle(WIDTH/2+150, HEIGHT/2, 0, 8, mass = 0.8, color = (150,150,150), radius = 5))
+
+    #Sun
+    #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.02204, mass=100, color = (250,250,0), radius = 10))
+    #Mars
+    particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5.34, mass = 0.0000323, color = (250,0,0), radius = 5))
+    #Earth and Moon
+    particles.append(Particle(WIDTH/2+230, HEIGHT/2, 0, 6.59, mass = 0.000300, color =(0,0,250), radius = 5))
+    particles.append(Particle(WIDTH/2+230.6, HEIGHT/2, 0, 6.8136, mass = 0.0000037, radius = 1))
+    #Venus
+    particles.append(Particle(WIDTH/2+166, HEIGHT/2, 0, 7.76, mass = 0.000245, radius = 5))
+    #Mercury
+    particles.append(Particle(WIDTH/2+90, HEIGHT/2, 0, 10.54, mass = 0.0000166, color = (150,120,0), radius = 5))
+    #particles.append(Particle(WIDTH/2+150, HEIGHT/2, 0, 8, mass = 0.8, color = (150,150,150), radius = 5))
+    #Balance so the total momentum of the system is 0
+    sun_momentum = 0
+    sun_mass = 100
+    for planet in particles:
+        sun_momentum += planet.vel[1]*planet.mass
+    
+    sun_speed = - sun_momentum/sun_mass
+    #Sun
+    particles.append(Particle(WIDTH/2, HEIGHT/2, 0, sun_speed, mass=sun_mass, color = (250,250,0), radius = 10))
+
+    #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.1496, mass=100, color = (250,250,0), radius = 10))
+    #particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5, color = (0,0,250), radius = 5))
+    #particles.append(Particle(WIDTH/2+365, HEIGHT/2, 0, 7.8, mass = 0.2, radius = 3))
+    #particles.append(Particle(WIDTH/2+70, HEIGHT/2, 0, 10, mass = 0.2, color = (150,120,0), radius = 5))
+    #particles.append(Particle(WIDTH/2+150, HEIGHT/2, 0, 8, mass = 0.8, color = (150,150,150), radius = 5))
     
     #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.065, mass=100, color = (250,250,0), radius = 10))
     #particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5, color = (0,0,250), radius = 5))

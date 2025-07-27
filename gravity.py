@@ -32,7 +32,7 @@ class Particle:
         self.vel += self.acc*TIME_STEP
         self.pos += self.vel*TIME_STEP
         self.acc = np.zeros(2)
-        self.wall_collision()
+        #self.wall_collision()
 
     def wall_collision(self):
         for i in [0, 1]:

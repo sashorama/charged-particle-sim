@@ -17,6 +17,7 @@ if __name__ == "__main__":
     EARTH_MASS = 0.0003
     MOON_MASS = 0.0000037
     MARS_MASS = 0.0000323
+    PROBE_MASS = 0.0000000001
 
     MERCURY_DIST = 90
     VENUS_DIST = 166
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     Planets.append(Planet(VENUS_DIST, VENUS_MASS, (150,150,150),5))
     Planets.append(Planet(MOON_DIST, MOON_MASS, (150,150,150),1))
     #Add velocity for the moon to orbit the earth
-    Planets[4].speed += math.sqrt(GRAVITY_FORCE_K*EARTH_MASS/EARTH_MOON_DIST)
+    Planets[4].speed += math.sqrt(GRAVITY_FORCE_K*EARTH_MASS/0.6)
 
     momentum = 0
     for planet in Planets:
@@ -42,8 +43,9 @@ if __name__ == "__main__":
     particles = []
     #Sun
     particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -momentum, mass=SUN_MASS, color = (250,250,0), radius = 10))
-    #Mars
-    
+    #Probe
+    particles.append(Particle(WIDTH/2-20, HEIGHT/2, 0, -31.5, mass=MARS_MASS, color = (250,250,250), radius = 2))
+    #particles.append(Particle(WIDTH/2+EARTH_DIST+4,HEIGHT/2,0,Planets[2].speed+0.79965,mass=PROBE_MASS, color = (250,250,25), radius = 4))
     for planet in Planets:
         particles.append(Particle(WIDTH/2+planet.dist, HEIGHT/2, 0, planet.speed, mass=planet.mass, color = planet.color, radius = planet.radius))
 
@@ -57,7 +59,7 @@ if __name__ == "__main__":
                 running = False
     
         run_simulation(particles)
-        #print(np.linalg.norm(particles[0].pos-[WIDTH/2, HEIGHT/2]))
+        #print(np.linalg.norm(particles[1].pos-[WIDTH/2,HEIGHT/2]))
         pygame.display.flip()
     
     pygame.quit()

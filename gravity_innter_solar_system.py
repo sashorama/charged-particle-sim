@@ -61,12 +61,16 @@ if __name__ == "__main__":
 
     mu_sun = GRAVITY_FORCE_K*SUN_MASS
     mu_earth = GRAVITY_FORCE_K*EARTH_MASS
+    mu_mars = GRAVITY_FORCE_K*MARS_MASS
     probe_transit_orbit = EARTH_DIST*(EARTH_MASS/SUN_MASS)**0.4
     probe_transit_orbit *= 1.1
-    print(f" Probe transit orbit hight is {probe_transit_orbit}")
+    #print(f" Probe transit orbit hight is {probe_transit_orbit}")
     a = (EARTH_DIST+probe_transit_orbit+MARS_DIST)/2
     v_escape = np.sqrt(2*mu_earth/probe_transit_orbit)
     v_transit = np.sqrt(mu_sun*(2/(EARTH_DIST+probe_transit_orbit)-1/a))
+    #v_delta = np.sqrt(mu_sun/MARS_DIST) - np.sqrt(2*mu_sun/(1/MARS_DIST-1/(2*a)))
+    v_delta = np.sqrt(mu_sun/MARS_DIST) - np.sqrt(2*mu_sun*(1/MARS_DIST-1/(2*a)))
+    #print(f"V delta = {v_delta}")
     #Add 0.35% of velocity to counter the Earths gravitational influence
     #Alternativly mid flight boots can be used
     v_transit *= 1.0035
@@ -78,17 +82,17 @@ if __name__ == "__main__":
     while running:
         #probe_distance = None
         clock.tick(FPS)
-        #screen.fill((0, 0, 0))
-
+        screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 24)  # None = default font, 48 = font size
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
         run_simulation(particles)
 
         angle_earth_mars = angle(earth.pos, mars.pos, sun.pos)
-        if abs(angle_earth_mars - 44) < 3: 
-            print(f"angle is {angle_earth_mars}")
-        
+        #if abs(angle_earth_mars - 44) < 3: 
+        #    print(f"angle is {angle_earth_mars}")
+
         #If angle between Earth and Mars is 44 degrees shoot the probe
         if abs(angle_earth_mars - 43.8) < 0.5 and probe_lounched == False:
             probe_lounched = True
@@ -104,20 +108,32 @@ if __name__ == "__main__":
         
         if probe:
             probe_distance = np.linalg.norm(probe.pos-mars.pos)
-            if probe_distance < 3:
-                print(probe_distance)
-            if False and probe_distance < 0.7:
-                speed_difference = mars.vel-probe.vel
-                r_speed_vec = speed_difference/np.linalg.norm(speed_difference)
-                dist_vec = mars.pos-probe.pos
-                r_dist_vec = dist_vec/np.linalg.norm(dist_vec)
-                rotated_r_dist_vec = np.array([-r_dist_vec[1], r_dist_vec[0]])
-                v_orbital = math.sqrt(GRAVITY_FORCE_K*MARS_MASS/np.linalg.norm(dist_vec))
-                deceleration = probe.vel + rotated_r_dist_vec*v_orbital
-                probe.vel = deceleration
+            text_surface = font.render(f"probe_distance is: {probe_distance}", True, (255, 255, 255))
+            screen.blit(text_surface, (50, 100))
+            #if probe_distance < 3:
+            #    print(probe_distance)
+            if probe_distance < 0.6 and decelerate_probe_used == False:
                 decelerate_probe_used = True
-                #print(f"speed difference {speed_difference} deceleration {deceleration}")
-                #print(f"speed difference after {particles[1].vel-particles[3].vel}")
+                #vel_difference = mars.vel-probe.vel
+                #r_speed_vec = speed_difference/np.linalg.norm(speed_difference)
+                #dist_vec = mars.pos-probe.pos
+                #r_dist_vec = dist_vec/np.linalg.norm(dist_vec)
+                #rotated_r_dist_vec = np.array([-r_dist_vec[1], r_dist_vec[0]])
+                #v_orbital = math.sqrt(GRAVITY_FORCE_K*MARS_MASS/np.linalg.norm(dist_vec))
+                #deceleration = v_delta*probe.vel/np.linalg.norm(probe.vel)
+                deceleration = mars.vel - probe.vel
+                print(f"Delta V {np.linalg.norm(deceleration)} needed")
+                print(f"Theory Delta V {v_delta} needed")
+                print(probe.vel - mars.vel)
+                print(np.linalg.norm(probe.vel - mars.vel))
+                #print(v_delta)
+                #probe.vel = mars.vel - rotated_r_dist_vec*v_orbital
+                print(f"Mars vel {mars.vel} deceleration")
+                print(f"Probe vel  {probe.vel}")
+                probe.vel += deceleration
+                decelerate_probe_used = True
+                print(f"Mars vel {probe.vel} deceleration")
+                print(f"Probe vel  {mars.vel}")
         for p in particles:
             p.draw()
         pygame.display.flip()

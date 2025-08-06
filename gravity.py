@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Pygame setup
 WIDTH, HEIGHT = 1000, 800
-FPS = 25
+FPS = 30
 PARTICLE_RADIUS = 5
 N_PARTICLES = 0
 GRAVITY_FORCE_K = 100
@@ -15,18 +15,19 @@ VEL_DRAG = 0.99
 GRAVITY_FORCE_E = 0.1 # Gravity Softening in close distance
 TIME_STEP = 0.01
 
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
+#pygame.init()
+#screen = pygame.display.set_mode((WIDTH, HEIGHT))
+#clock = pygame.time.Clock()
 
 class Particle:
-    def __init__(self, x, y, vx, vy,  mass=MASS, color = (150,150,150), radius=PARTICLE_RADIUS):
+    def __init__(self,screen, x, y, vx, vy,  mass=MASS, color = (150,150,150), radius=PARTICLE_RADIUS):
         self.pos = np.array([x, y], dtype=float)
         self.vel = np.array([vx, vy], dtype=float)
         self.acc = np.zeros(2)
         self.mass = mass
         self.color = color
         self.radius = radius
+        self.screen = screen
 
     def update(self):
         self.vel += self.acc*TIME_STEP
@@ -44,7 +45,7 @@ class Particle:
                 self.vel[i] *= -1
 
     def draw(self):
-        pygame.draw.circle(screen, self.color, self.pos.astype(int), self.radius)
+        pygame.draw.circle(self.screen, self.color, self.pos.astype(int), self.radius)
 
 
 def compute_forces(particles):
@@ -55,10 +56,6 @@ def compute_forces(particles):
             dist = np.linalg.norm(r_vec)
             dir_vec = r_vec / dist
 
-            # Spead drag at very close distance
-            #if dist < 5 and np.linalg.norm(p1.vel - p2.vel) > 50:
-            #    p1.vel *= VEL_DRAG
-            #    p2.vel *= VEL_DRAG
 
             # Mass Attractions
             f_mag = -GRAVITY_FORCE_K*p1.mass*p2.mass / (dist ** 2+GRAVITY_FORCE_E**2)
@@ -72,65 +69,21 @@ def run_simulation(particles):
         compute_forces(particles)
         for p in particles:
             p.update()
-    for p in particles:
-        p.draw()
-#mathplotlib
 
-if __name__ == '__main__':
-    # Create particles
-    particles = []
-    for _ in range(N_PARTICLES):
-        x = random.uniform(PARTICLE_RADIUS, WIDTH - PARTICLE_RADIUS)
-        y = random.uniform(PARTICLE_RADIUS, HEIGHT - PARTICLE_RADIUS)
-        vx = random.uniform(-5, 5)
-        vy = random.uniform(-5, 5)
-        particles.append(Particle(x, y, vx, vy))
+def angle(a,b,center):
+    '''Returns the signed angle between a and b coordinates and tip at center'''
+    #As Top Left corner is the [0,0] shift the positional vectors
+    #Take copy of the positions because we done want to modify them
+    a_centered = a.copy()
+    b_centered = b.copy()
+    a_centered -= center
+    b_centered -= center
+    #a_norm = np.linalg.norm(a_centered)
+    #b_norm = np.linalg.norm(b_centered)
+    #arccos returns unsigned angle. Not used because rotation direction matters here.
+    #angle_rad = np.arccos(np.dot(a,b)/(a_norm*b_norm))
+    cross = a_centered[0]*b_centered[1] - a_centered[1]*b_centered[0]
+    dot = np.dot(a_centered, b_centered)    
+    return np.degrees(np.arctan2(cross, dot))
 
-    particles = []
 
-    #Sun
-    #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.02204, mass=100, color = (250,250,0), radius = 10))
-    #Mars
-    particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5.34, mass = 0.0000323, color = (250,0,0), radius = 5))
-    #Earth and Moon
-    particles.append(Particle(WIDTH/2+230, HEIGHT/2, 0, 6.59, mass = 0.000300, color =(0,0,250), radius = 5))
-    particles.append(Particle(WIDTH/2+230.6, HEIGHT/2, 0, 6.8136, mass = 0.0000037, radius = 1))
-    #Venus
-    particles.append(Particle(WIDTH/2+166, HEIGHT/2, 0, 7.76, mass = 0.000245, radius = 5))
-    #Mercury
-    particles.append(Particle(WIDTH/2+90, HEIGHT/2, 0, 10.54, mass = 0.0000166, color = (150,120,0), radius = 5))
-    #particles.append(Particle(WIDTH/2+150, HEIGHT/2, 0, 8, mass = 0.8, color = (150,150,150), radius = 5))
-    #Balance so the total momentum of the system is 0
-    sun_momentum = 0
-    sun_mass = 100
-    for planet in particles:
-        sun_momentum += planet.vel[1]*planet.mass
-    
-    sun_speed = - sun_momentum/sun_mass
-    #Sun
-    particles.append(Particle(WIDTH/2, HEIGHT/2, 0, sun_speed, mass=sun_mass, color = (250,250,0), radius = 10))
-
-    #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.1496, mass=100, color = (250,250,0), radius = 10))
-    #particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5, color = (0,0,250), radius = 5))
-    #particles.append(Particle(WIDTH/2+365, HEIGHT/2, 0, 7.8, mass = 0.2, radius = 3))
-    #particles.append(Particle(WIDTH/2+70, HEIGHT/2, 0, 10, mass = 0.2, color = (150,120,0), radius = 5))
-    #particles.append(Particle(WIDTH/2+150, HEIGHT/2, 0, 8, mass = 0.8, color = (150,150,150), radius = 5))
-    
-    #particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -0.065, mass=100, color = (250,250,0), radius = 10))
-    #particles.append(Particle(WIDTH/2+350, HEIGHT/2, 0, 5, color = (0,0,250), radius = 5))
-    #particles.append(Particle(WIDTH/2+360, HEIGHT/2, 0, 7.5, mass = 0.2, radius = 3))
-    # Main loop
-    running = True
-
-    while running:
-        clock.tick(FPS)
-        screen.fill((0, 0, 0))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-    
-        run_simulation(particles)
-        pygame.display.flip()
-    
-    pygame.quit()

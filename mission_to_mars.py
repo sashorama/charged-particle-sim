@@ -27,23 +27,19 @@ class Planet:
 
 
 if __name__ == "__main__":       
-
     planet_mars = Planet(MARS_DIST, MARS_MASS, (250,0,0),2)
-    planet_earth = Planet(EARTH_DIST, EARTH_MASS, (0,50,250),2)
-
-
-    momentum = 0
-
-    
+    planet_earth = Planet(EARTH_DIST, EARTH_MASS, (0,50,250),2)   
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock() 
     particles = []
     #Sun
-    sun = Particle(screen, WIDTH/2, HEIGHT/2, 0, -momentum, mass=SUN_MASS, color = (250,250,0), radius = 10)
+    sun = Particle(screen, WIDTH/2, HEIGHT/2, 0, 0, mass=SUN_MASS, color = (250,250,0), radius = 10)
+    mars = Particle(screen, WIDTH/2+planet_mars.dist, HEIGHT/2, 0, planet_mars.speed, mass=planet_mars.mass, 
+                    color = planet_mars.color, radius = planet_mars.radius)
+    earth = Particle(screen, WIDTH/2-planet_earth.dist, HEIGHT/2, 0, -planet_earth.speed, mass=planet_earth.mass, 
+                    color = planet_earth.color, radius = planet_earth.radius)
     particles.append(sun)
-    mars = Particle(screen, WIDTH/2+planet_mars.dist, HEIGHT/2, 0, planet_mars.speed, mass=planet_mars.mass, color = planet_mars.color, radius = planet_mars.radius)
-    earth = Particle(screen, WIDTH/2-planet_earth.dist, HEIGHT/2, 0, -planet_earth.speed, mass=planet_earth.mass, color = planet_earth.color, radius = planet_earth.radius)
     particles.append(earth)
     particles.append(mars)
     #calculate the speed for transit to Mars
@@ -51,11 +47,13 @@ if __name__ == "__main__":
     mu_sun = GRAVITY_FORCE_K*SUN_MASS
     mu_earth = GRAVITY_FORCE_K*EARTH_MASS
     mu_mars = GRAVITY_FORCE_K*MARS_MASS
-    probe_transit_orbit = EARTH_DIST*(EARTH_MASS/SUN_MASS)**0.4
-    probe_transit_orbit *= 1.1
-    a = (EARTH_DIST+probe_transit_orbit+MARS_DIST)/2
-    v_escape = np.sqrt(2*mu_earth/probe_transit_orbit)
-    v_transit = np.sqrt(mu_sun*(2/(EARTH_DIST+probe_transit_orbit)-1/a))
+    #Calculate Sphere of Influence where planet gravity dominates
+    earth_soi = EARTH_DIST*(EARTH_MASS/SUN_MASS)**0.4
+    earth_soi *= 1.1 # Extend it by 10% so we get less Earths influece when we start the orbit the Sun
+    mars_soi = MARS_DIST*(MARS_MASS/SUN_MASS)**0.4
+    print(mars_soi)
+    a = (EARTH_DIST+earth_soi+MARS_DIST)/2
+    v_transit = np.sqrt(mu_sun*(2/(EARTH_DIST+earth_soi)-1/a))
     v_delta = np.sqrt(mu_sun/MARS_DIST) - np.sqrt(2*mu_sun*(1/MARS_DIST-1/(2*a)))
     #Add 0.35% of velocity to counter the Earths gravitational influence
     #Alternativly mid flight boots can be used
@@ -63,7 +61,6 @@ if __name__ == "__main__":
 
     text_angle = ""
     text_dV  = "dV to catch Mars not used yet"
-    text_dV
     text_probe_distance = "Probe not lounched yet"
     text_dV_theory = f"еxpected dV = {round(v_delta,3)}"
     text_probe_distance_min = "dist_min="
@@ -111,7 +108,7 @@ if __name__ == "__main__":
                 probe_vel = v_transit * earth_vel_norm 
                 earth_pos_sun = earth.pos - sun.pos
                 norm_earth_pos_sun = earth_pos_sun/np.linalg.norm(earth_pos_sun)
-                probe_pos = earth.pos + norm_earth_pos_sun*probe_transit_orbit
+                probe_pos = earth.pos + norm_earth_pos_sun*earth_soi
                 probe = Particle(screen, probe_pos[0], probe_pos[1], probe_vel[0], probe_vel[1],mass=PROBE_MASS, color = (250,250,25), radius = 1)
                 particles.append(probe)
 
@@ -125,7 +122,7 @@ if __name__ == "__main__":
                 probe_distance_min = probe_distance
             text_probe_distance_min = f"dist_min = {probe_distance_min}"
             text_probe_distance = f"dists = {round(probe_distance,3)}"
-            if probe_distance < 0.5 and decelerate_probe_used == False:
+            if probe_distance < mars_soi and decelerate_probe_used == False:
                 decelerate_probe_used = True
                 deceleration = mars.vel - probe.vel
                 text_dV = f"dV = {round(np.linalg.norm(deceleration),3)}"

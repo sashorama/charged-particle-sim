@@ -25,7 +25,15 @@ if __name__ == "__main__":
     EARTH_MOON_DIST = 0.6
     MOON_DIST = EARTH_DIST+EARTH_MOON_DIST
     MARS_DIST = 350
+    COMMET_DIST = 20
     
+    #Calculations
+    #Commet excape Sun gravity system velocyty
+    v_commet_escape = np.sqrt(2*SUN_MASS*GRAVITY_FORCE_K/COMMET_DIST)
+    v_commet_speed = v_commet_escape*0.999
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    clock = pygame.time.Clock() 
 
     Planets = []
     Planets.append(Planet(MERCURY_DIST, MERCURY_MASS, (150,120,0),5))
@@ -42,24 +50,30 @@ if __name__ == "__main__":
     
     particles = []
     #Sun
-    particles.append(Particle(WIDTH/2, HEIGHT/2, 0, -momentum, mass=SUN_MASS, color = (250,250,0), radius = 10))
-    #Probe
-    particles.append(Particle(WIDTH/2-20, HEIGHT/2, 0, -31.5, mass=MARS_MASS, color = (250,250,250), radius = 2))
-    #particles.append(Particle(WIDTH/2+EARTH_DIST+4,HEIGHT/2,0,Planets[2].speed+0.79965,mass=PROBE_MASS, color = (250,250,25), radius = 4))
+    particles.append(Particle(screen, WIDTH/2, HEIGHT/2, 0, -momentum, mass=SUN_MASS, color = (250,250,0), radius = 10))
+    #Commet
+    particles.append(Particle(screen, WIDTH/2-COMMET_DIST, HEIGHT/2, 0, -v_commet_speed, mass=MARS_MASS, color = (250,250,250), radius = 2))
+    #Append Planets
     for planet in Planets:
-        particles.append(Particle(WIDTH/2+planet.dist, HEIGHT/2, 0, planet.speed, mass=planet.mass, color = planet.color, radius = planet.radius))
+        particles.append(Particle(screen, WIDTH/2+planet.dist, HEIGHT/2, 0, planet.speed, mass=planet.mass, color = planet.color, radius = planet.radius))
 
+    font = pygame.font.Font(None, 24)  # None = default font, 48 = font size
+    text_commet_distance = ''
     running = True
     while running:
+
         clock.tick(FPS)
         screen.fill((0, 0, 0))
-
+        comment_distance = np.linalg.norm(particles[0].pos - particles[1].pos)
+        text_commet_distance = f"Commen to Sun distance = {round(comment_distance)}"
+        text_surface_commet_distance = font.render(text_commet_distance, True, (255, 255, 255))
+        screen.blit(text_surface_commet_distance, (10, 10))
+                    
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-    
-        run_simulation(particles)
-        #print(np.linalg.norm(particles[1].pos-[WIDTH/2,HEIGHT/2]))
+        run_simulation(particles)    
+        for p in particles:
+            p.draw()
         pygame.display.flip()
-    
     pygame.quit()

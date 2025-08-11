@@ -65,7 +65,7 @@ def compute_forces(particles):
             
 
 def run_simulation(particles):       
-    for _ in range(int(1/TIME_STEP)):  # 4 substeps per frame   
+    for _ in range(int(1/TIME_STEP)):  # TIME_STEP substeps per frame   
         compute_forces(particles)
         for p in particles:
             p.update()
@@ -73,14 +73,11 @@ def run_simulation(particles):
 def angle(a,b,center):
     '''Returns the signed angle between a and b coordinates and tip at center'''
     #As Top Left corner is the [0,0] shift the positional vectors
-    #Take copy of the positions because we done want to modify them
+    #Take copy of the positions because we don't want to modify them
     a_centered = a.copy()
     b_centered = b.copy()
     a_centered -= center
     b_centered -= center
-    #a_norm = np.linalg.norm(a_centered)
-    #b_norm = np.linalg.norm(b_centered)
-    #arccos returns unsigned angle. Not used because rotation direction matters here.
     #angle_rad = np.arccos(np.dot(a,b)/(a_norm*b_norm))
     cross = a_centered[0]*b_centered[1] - a_centered[1]*b_centered[0]
     dot = np.dot(a_centered, b_centered)    

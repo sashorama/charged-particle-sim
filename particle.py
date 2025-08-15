@@ -18,7 +18,7 @@ MASS = 1
 VEL_DRAG = 0.99
 CHARGE_FORCE_E = 10 # Coulomb force softnef especially in close distance
 MINIMUM_DISTANCE = 2
-TIME_STEP = 0.01
+TIME_STEP = 0.1
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))

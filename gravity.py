@@ -9,31 +9,48 @@ WIDTH, HEIGHT = 1000, 800
 FPS = 30
 PARTICLE_RADIUS = 5
 N_PARTICLES = 0
-GRAVITY_FORCE_K = 100
+GRAVITY_FORCE_K = 0.1
 MASS = 1
 VEL_DRAG = 0.99
-GRAVITY_FORCE_E = 0.1 # Gravity Softening in close distance
+GRAVITY_FORCE_E = 1 # Gravity Softening in close distance
 TIME_STEP = 0.01
 
+
+SUN_MASS = 100
+MERCURY_MASS = 0.0000166
+VENUS_MASS = 0.000245
+EARTH_MASS = 0.0003
+MOON_MASS = 0.0000037
+MARS_MASS = 0.0000323
+PROBE_MASS = 0.0000000001
+
+MERCURY_DIST = 90
+VENUS_DIST = 166
+EARTH_DIST = 230
+EARTH_MOON_DIST = 0.6
+MOON_DIST = EARTH_DIST+EARTH_MOON_DIST
+MARS_DIST = 350
 #pygame.init()
 #screen = pygame.display.set_mode((WIDTH, HEIGHT))
 #clock = pygame.time.Clock()
 
 class Particle:
-    def __init__(self,screen, x, y, vx, vy,  mass=MASS, color = (150,150,150), radius=PARTICLE_RADIUS):
-        self.pos = np.array([x, y], dtype=float)
-        self.vel = np.array([vx, vy], dtype=float)
+    def __init__(self,screen, x, y, vx, vy,  mass=MASS, color = (150,150,150), radius=PARTICLE_RADIUS, walls = False):
+        self.pos = np.array([x, y], dtype=np.float64)
+        self.vel = np.array([vx, vy], dtype=np.float64)
         self.acc = np.zeros(2)
         self.mass = mass
         self.color = color
         self.radius = radius
         self.screen = screen
+        self.walls = walls
 
     def update(self):
         self.vel += self.acc*TIME_STEP
         self.pos += self.vel*TIME_STEP
         self.acc = np.zeros(2)
-        #self.wall_collision()
+        if self.walls:
+            self.wall_collision()
 
     def wall_collision(self):
         for i in [0, 1]:
@@ -83,4 +100,10 @@ def angle(a,b,center):
     dot = np.dot(a_centered, b_centered)    
     return np.degrees(np.arctan2(cross, dot))
 
-
+def rotate_vector(vec, angle_degrees):
+    angle_radians = np.radians(angle_degrees)
+    rotation_matrix = np.array([
+        [np.cos(angle_radians), -np.sin(angle_radians)],
+        [np.sin(angle_radians),  np.cos(angle_radians)]
+    ])
+    return rotation_matrix @ vec

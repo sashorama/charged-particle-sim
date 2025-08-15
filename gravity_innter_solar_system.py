@@ -30,7 +30,7 @@ if __name__ == "__main__":
     #Calculations
     #Commet excape Sun gravity system velocyty
     v_commet_escape = np.sqrt(2*SUN_MASS*GRAVITY_FORCE_K/COMMET_DIST)
-    v_commet_speed = v_commet_escape*0.999
+    v_commet_speed = v_commet_escape*0.95
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock() 
